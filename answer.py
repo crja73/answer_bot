@@ -28,27 +28,39 @@ async def process_start_command(message: types.Message):
             sms = message.text + ":" + str(message.from_user.id)
             f.write(sms + '\n')
     else:
-        try:
-            if message.from_user.id == admin_id:
-                f = open('users.txt', 'r')
-                for i in f.readlines():
-                    if message.reply_to_message.text in i:
+        
+        if message.from_user.id == admin_id:
+            f = open('users.txt', 'r')
+            for i in f.readlines():
+                if message.photo is not None:
+                    print(message.photo)
+                    if message.photo.file_id in i:
                         u_id = i.split(':')[1]
-                        print(u_id)
-                await bot.send_message(u_id, message.text)
-            else:
-                await message.answer('Нельзя отвечать на сообщения.')
-        except Exception as e:
-            await bot.send_message(admin_id, e)
+                    else:
+                        print('non')
+                elif message.reply_to_message.text in i:
+                    u_id = i.split(':')[1]
+                    print(u_id)
+            await bot.send_message(u_id, message.text)
+        else:
+            await message.answer('Нельзя отвечать на сообщения.')
+       
 
             
 @dp.message_handler(content_types=['photo'])
 async def handle_docs_photo(message):
+    photo_id = message.photo[-1].file_id
+    print(photo_id)
+
+    f = open('users.txt', "a")
+    sms = photo_id + ":" + str(message.from_user.id)
+    f.write(sms + '\n')
     await bot.forward_message(admin_id, message.from_user.id, message.message_id)
 
     
 @dp.message_handler(content_types=['document'])
 async def handle_docs_photo(message):
+
     await bot.forward_message(admin_id, message.from_user.id, message.message_id)
 
     
